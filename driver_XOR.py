@@ -1,6 +1,16 @@
 import numpy as np
-from DeepNeuralNetwork import DeepNeuralNetwork
 import argparse
+from DeepNeuralNetwork_Numpy import DeepNeuralNetwork_Numpy
+from DeepNeuralNetwork_Pytorch import DeepNeuralNetwork_Pytorch
+
+
+NODES = [2, 8, 8, 1]
+MODEL = "pytorch"        ### pytorch or numpy
+OPT = "sgd"             ### "sgd", "momentum", "adam"
+ACT = "tanh"             ### "sigmoid", "relu", "tanh"
+L_R = 0.01
+EPOCH = 10
+
 
 # Define XOR dataset
 def generate_xor_data(n_samples=1000):
@@ -8,16 +18,25 @@ def generate_xor_data(n_samples=1000):
     Y = np.logical_xor(X[:, 0], X[:, 1]).astype(int).reshape(-1, 1)
     return X.astype(np.float32), Y
 
-NODES = [2, 4, 1]  # 2-input XOR, 1 hidden layer with 4 nodes, 1 output
-
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--batch_size", default=4)
-    parser.add_argument("--optimizer", default="adam") # momentum # SGD # adam
-    parser.add_argument("--activation", default="relu")  # Works better for XOR
-    parser.add_argument("--l_rate", default=0.01)
-    parser.add_argument("--beta", default=0.9)
-    parser.add_argument("--epochs", default=100)
+    parser = argparse.ArgumentParser(description="Train a deep neural network on MNIST using NumPy or PyTorch.")
+    parser.add_argument("--nodes", nargs="+", type=int, default=NODES,
+                        help="List of layer sizes including input and output. Example: --nodes 784 256 128 10")
+    parser.add_argument("--model", default=MODEL, choices=["numpy", "pytorch"],
+                        help="Choose the backend for training: 'numpy' (pure NumPy) or 'pytorch' (uses PyTorch).")
+    parser.add_argument("--batch_size", type=int, default=64,
+                        help="Mini-batch size used during training.")
+    parser.add_argument("--optimizer", default=OPT, choices=["sgd", "momentum", "adam"],
+                        help="Optimization algorithm to use: 'sgd', 'momentum', or 'adam'.")
+    parser.add_argument("--activation", default=ACT, choices=["sigmoid", "relu", "tanh"],
+                        help="Activation function to use in hidden layers: 'sigmoid', 'relu', or 'tanh'.")
+    parser.add_argument("--l_rate", type=float, default=L_R,
+                        help="Learning rate for the optimizer.")
+    parser.add_argument("--beta", type=float, default=0.9,
+                        help="Beta value used for momentum or Adam optimizer.")
+    parser.add_argument("--epochs", type=int, default=EPOCH,
+                        help="Number of training epochs.")
+
     args = parser.parse_args()
 
     print("Generating XOR data...")
@@ -32,19 +51,23 @@ if __name__ == "__main__":
     print("Test data:", x_test.shape, y_test.shape)
 
     print("Start training...")
-    dnn = DeepNeuralNetwork(nodes=NODES, activation=args.activation)
-    dnn.Initialization()
-    dnn.Train(
+    # Model selection
+    if args.model.lower() == "pytorch":
+        model = DeepNeuralNetwork_Pytorch(nodes=args.nodes, activation=args.activation)
+    else:
+        model = DeepNeuralNetwork_Numpy(nodes=args.nodes, activation=args.activation)
+    model.Initialization()
+    model.Train(
         x_train, y_train, x_test, y_test,
-        batch_size=int(args.batch_size),
+        batch_size=args.batch_size,
         optimizer=args.optimizer,
-        learning_rate=float(args.l_rate),
-        beta=float(args.beta),
-        epochs=int(args.epochs)
+        learning_rate=args.l_rate,
+        beta=args.beta,
+        epochs=args.epochs
     )
 
     # Evaluate
-    preds = dnn.Predict(x_test)
+    preds = model.Predict(x_test)
     acc = np.mean(preds == y_test.flatten())
     print(f"Final test accuracy: {acc:.4f}")
 
