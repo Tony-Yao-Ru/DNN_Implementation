@@ -6,10 +6,10 @@ from DeepNeuralNetwork_Pytorch import DeepNeuralNetwork_Pytorch
 
 NODES = [2, 8, 8, 1]
 MODEL = "pytorch"        ### pytorch or numpy
-OPT = "sgd"             ### "sgd", "momentum", "adam"
+OPT = "sgd"              ### "sgd", "momentum", "adam"
 ACT = "tanh"             ### "sigmoid", "relu", "tanh"
-L_R = 0.01
-EPOCH = 10
+L_R = 0.001
+EPOCH = 1000
 
 
 # Define XOR dataset

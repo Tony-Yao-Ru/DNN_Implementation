@@ -10,11 +10,11 @@ def one_hot(labels, num_classes):
     return np.eye(num_classes)[labels]
 
 NODES = [784, 64, 64, 10]
-MODEL = "numpy"        ### pytorch or numpy
-OPT = "sgd"             ### "sgd", "momentum", "adam"
-ACT = "tanh"             ### "sigmoid", "relu", "tanh"
-L_R = 0.01
-EPOCH = 10
+MODEL = "pytorch"        ### pytorch or numpy
+OPT = "momentum"             ### "sgd", "momentum", "adam"
+ACT = "sigmoid"             ### "sigmoid", "relu", "tanh"
+L_R = 0.001
+EPOCH = 1000
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train a deep neural network on MNIST using NumPy or PyTorch.")
